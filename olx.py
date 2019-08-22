@@ -6,8 +6,11 @@ import re
 import json
 
 domain = 'https://www.olx.com.ar/autos-cat-378'
+headers = {'User-Agent':
+               'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) '
+               'Chrome/50.0.2661.102 Safari/537.36'}
 
-response = requests.get(domain)
+response = requests.get(domain, headers=headers)
 soup = BeautifulSoup(response.text, "html.parser")
 
 '''for para obtener el numero de la ultima pagina'''
@@ -39,22 +42,22 @@ j = 0
 
 for j in range(0, len(links_paginas)):
     url = links_paginas[j]
-    response = requests.get(url)
+    response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
 
     '''obtengo los links de las publaciones que hay por cada pagina'''
 
-    lista2 = []
+    links_publicaciones = []
 
     for i in range(108, 227):
         tag = soup.findAll('a')[i]
         href = tag['href']
         href2 = 'https:' + href
-        lista2 += [href2]
+        links_publicaciones += [href2]
 
     links_per_page = []
 
-    for i in lista2:
+    for i in links_publicaciones:
         if i not in links_per_page:
             links_per_page.append(i)
     links_per_page.remove('https:')
@@ -64,53 +67,31 @@ for j in range(0, len(links_paginas)):
     u = 0
 
     for u in range(0, len(links_per_page)):
-        url2 = links_per_page[u]
-        response = requests.get(url2)
+        url_public = links_per_page[u]
+        response = requests.get(url_public, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
         '''obtengo el ID de la publicacion en la que me encuentro'''
 
-        url3 = str(url2)
-        ides = re.findall('\d+', url3)
+        url_public_str = str(url_public)
+        ides = re.findall('\d+', url_public_str)
         ides = list(map(int, ides))
         ID = max(ides)
 
-        '''obtengo la marca del auto de la publicacion en la que me encuentro'''
+        '''obtengo los datos del vehiculo, obtengo la marca y luego creo el json'''
 
-        marca2 = []
+        datos_vehiculo = {}
 
-        for i in range(31, 32):
-            tag = soup.findAll('span')[i]
-            marca = tag.string
-            marca2 = marca.split(' ', 1)
-            marca22 = marca2[0]
+        for li_tag in soup.findAll('ul', {'class': 'item_partials_optionals_view compact'}):
+            for span_tag in li_tag.find_all('li'):
+                value = span_tag.find('span').text
+                field = span_tag.find('strong').text
+                datos_vehiculo[field] = value
 
-        '''obtengo los elementos a guardar en el archivo .json'''
+        marca = datos_vehiculo['Marca / Modelo:'].split(' ', 1)[0]
 
-        data_list = []
+        path = './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/'
 
-        for i in range(27, 34):
-            tag = soup.findAll('span')[i]
-            data = tag.string
-            data2 = data.split(' ', 1)
-            data_list += [data2]
-
-        for i in range(0, len(data_list)):
-            if len(data_list[i]) >= 2:
-                data_list[i] = "-".join(data_list[i])
-
-        '''datos del json'''
-
-        datos = {}
-        datos['año/condicion'] = ''.join(data_list[0])
-        datos['transmision'] = ''.join(data_list[1])
-        datos['vendedor'] = ''.join(data_list[2])
-        datos['kilometraje'] = ''.join(data_list[3])
-        datos['marca/modelo'] = ''.join(data_list[4])
-        datos['combustible'] = ''.join(data_list[5])
-        datos['color'] = ''.join(data_list[6])
-
-        path = './download/olx/' + str(marca2[0]).lower().replace(' ', '-') + '/' + str(ID) + '/'
         if not os.path.exists(path):
             os.makedirs(path)
 
@@ -123,7 +104,9 @@ for j in range(0, len(links_paginas)):
 
         '''creo el archivo .json con las características del vehiculo'''
 
-        writeToJSONFile('./download/olx/' + str(marca2[0]).lower().replace(' ', '-') + '/' + str(ID) + '/', datos)
+        writeToJSONFile('./download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/', datos_vehiculo)
+
+        print("Creado meta.json")
 
         '''obtengo los links de las imagenes de la publicacion en la que me encuentro'''
 
@@ -133,19 +116,24 @@ for j in range(0, len(links_paginas)):
         for i in range(0, len(soup.findAll('a'))):
             tag = soup.findAll('a')[i]
             href = tag['href']
-            if 'full' in href:
+            if 'image;p=full' in href:
                 q = q + 1
                 images += [href]
 
         y = 0
 
         while y < q:
-            path = './download/olx/' + str(marca2[0]).lower().replace(' ', '-') + '/' + str(ID) + '/'
+            path = './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/'
 
             if not os.path.exists(path):
                 os.makedirs(path)
-            urllib.request.urlretrieve(images[y], './download/olx/' + str(marca2[0]).lower().replace(' ', '-') + '/' + str(ID) + '/' + str(marca2[0]).lower() + str(y) + '.jpg')
-            print("Descargada la imagen", y + 1, "de la publicacion", u + 1, "de la pagina", j + 1)
+
+            try:
+                urllib.request.urlretrieve(images[y], './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/' + str(marca).lower() + '_' + str(ID) + '_' + str(y + 1) + '.jpg')
+                print("Descargada la imagen", y + 1, "de la publicacion", u + 1, "de la pagina", j + 1)
+            except Exception as e:
+                print(str(e), images[y])
+
             y = y + 1
 
-print("The end")
+print("End")
