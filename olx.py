@@ -52,15 +52,15 @@ for j in range(0, len(links_paginas)):
     for i in range(108, 227):
         tag = soup.findAll('a')[i]
         href = tag['href']
-        href2 = 'https:' + href
-        links_publicaciones += [href2]
+        if 'iid' in href:
+            href2 = 'https:' + href
+            links_publicaciones += [href2]
 
     links_per_page = []
 
     for i in links_publicaciones:
         if i not in links_per_page:
             links_per_page.append(i)
-    links_per_page.remove('https:')
 
     '''for para recorrer todas las publicaciones dentro de una pagina'''
 
@@ -68,6 +68,7 @@ for j in range(0, len(links_paginas)):
 
     for u in range(0, len(links_per_page)):
         url_public = links_per_page[u]
+        print(url_public)
         response = requests.get(url_public, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
 
@@ -81,14 +82,21 @@ for j in range(0, len(links_paginas)):
         '''obtengo los datos del vehiculo, obtengo la marca y luego creo el json'''
 
         datos_vehiculo = {}
+        campos = []
 
         for li_tag in soup.findAll('ul', {'class': 'item_partials_optionals_view compact'}):
             for span_tag in li_tag.find_all('li'):
                 value = span_tag.find('span').text
                 field = span_tag.find('strong').text
+                campos += [field]
                 datos_vehiculo[field] = value
 
-        marca = datos_vehiculo['Marca / Modelo:'].split(' ', 1)[0]
+        if 'Marca / Modelo:' in campos:
+            marca = datos_vehiculo['Marca / Modelo:'].split(' ', 1)[0]
+        elif 'Marca:' in campos:
+            marca = datos_vehiculo['Marca:']
+        else:
+            marca = "unknown"
 
         path = './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/'
 
@@ -111,6 +119,7 @@ for j in range(0, len(links_paginas)):
         '''obtengo los links de las imagenes de la publicacion en la que me encuentro'''
 
         q = 0
+        images2 = []
         images = []
 
         for i in range(0, len(soup.findAll('a'))):
@@ -119,6 +128,18 @@ for j in range(0, len(links_paginas)):
             if 'image;p=full' in href:
                 q = q + 1
                 images += [href]
+
+        if len(images) == 0:
+            for i in range(0, len(soup.findAll('img'))):
+                tag = soup.findAll('img')[i]
+                source = tag['src']
+                if 'image;p=full' in source:
+                    q = 1
+                    images2 += [source]
+
+        for i in images2:
+            if i not in images:
+                images.append(i)
 
         y = 0
 
