@@ -105,14 +105,14 @@ for j in range(0, len(links_paginas)):
 
         '''funcion para crear archivos json'''
 
-        def writeToJSONFile(path, data):
-            filePathNameWExt = path + 'meta.json'
-            with open(filePathNameWExt, 'w') as fp:
+        def writetojsonfile(path, data):
+            filepathnamewext = path + 'meta.json'
+            with open(filepathnamewext, 'w') as fp:
                 json.dump(data, fp)
 
         '''creo el archivo .json con las características del vehiculo'''
 
-        writeToJSONFile('./download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/', datos_vehiculo)
+        writetojsonfile('./download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/', datos_vehiculo)
 
         print("Creado meta.json")
 
@@ -144,11 +144,6 @@ for j in range(0, len(links_paginas)):
         y = 0
 
         while y < q:
-            path = './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/'
-
-            if not os.path.exists(path):
-                os.makedirs(path)
-
             try:
                 urllib.request.urlretrieve(images[y], './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/' + str(marca).lower() + '_' + str(ID) + '_' + str(y + 1) + '.jpg')
                 print("Descargada la imagen", y + 1, "de la publicacion", u + 1, "de la pagina", j + 1)
