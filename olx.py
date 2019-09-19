@@ -89,9 +89,11 @@ else:
 
 doms = json.loads(domains)
 
-count = 8  # count es el contador que indica en cual link arranca la descarga de imagenes
+count = 0  # count es el contador que indica en cual link arranca la descarga de imagenes
 
-while count <= 100:
+links_number = 100  # aca va el numero de links guardados en el json
+
+while count <= links_number:
     url_public = doms['url' + str(count)]
     print(url_public, count)
 
