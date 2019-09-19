@@ -15,50 +15,50 @@ soup = BeautifulSoup(response.text, "html.parser")
 
 # for para obtener el numero de la ultima pagina
 
-lista = []
+list_nums = []
 
 for i in range(0, 1):
     tag2 = soup.findAll('p')[i]
     tag2 = str(tag2)
     tag2 = tag2.replace('.', '')
-    lista = re.findall('\d+', tag2)
+    list_nums = re.findall('\d+', tag2)
 
 # while para crear el array con los links de todas las páginas
 
 k = 2
-links_paginas = []
+links_pages = []
 
-while k <= int(lista[1]):
-    links_paginas += ['https://www.olx.com.ar/autos-cat-378-p-' + str(k)]
+while k <= int(list_nums[1]):
+    links_pages += ['https://www.olx.com.ar/autos-cat-378-p-' + str(k)]
     k = k + 1
 
-links_paginas.reverse()
-links_paginas.append("https://www.olx.com.ar/autos-cat-378")
-links_paginas.reverse()
+links_pages.reverse()
+links_pages.append("https://www.olx.com.ar/autos-cat-378")
+links_pages.reverse()
 
 # for para recorrer todas las paginas de autos
 
 j = 0
 
-for j in range(0, len(links_paginas)):
-    url = links_paginas[j]
+for j in range(0, len(links_pages)):
+    url = links_pages[j]
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, "html.parser")
 
     # obtengo los links de las publaciones que hay por cada pagina
 
-    links_publicaciones = []
+    links_public = []
 
     for i in range(108, 227):
         tag = soup.findAll('a')[i]
         href = tag['href']
         if 'iid' in href:
             href2 = 'https:' + href
-            links_publicaciones += [href2]
+            links_public += [href2]
 
     links_per_page = []
 
-    for i in links_publicaciones:
+    for i in links_public:
         if i not in links_per_page:
             links_per_page.append(i)
 
@@ -81,34 +81,34 @@ for j in range(0, len(links_paginas)):
 
         # obtengo los datos del vehiculo, obtengo la marca y luego creo el json
 
-        datos_vehiculo = {}
-        campos = []
+        data_vehicle = {}
+        fields = []
 
         for li_tag in soup.findAll('ul', {'class': 'item_partials_optionals_view compact'}):
             for span_tag in li_tag.find_all('li'):
                 value = span_tag.find('span').text
                 field = span_tag.find('strong').text
-                campos += [field]
-                datos_vehiculo[field] = value
+                fields += [field]
+                data_vehicle[field] = value
 
-        if 'Marca / Modelo:' in campos:
-            marca = datos_vehiculo['Marca / Modelo:'].split(' ', 1)[0]
-        elif 'Marca:' in campos:
-            marca = datos_vehiculo['Marca:']
+        if 'Marca / Modelo:' in fields:
+            brand = data_vehicle['Marca / Modelo:'].split(' ', 1)[0]
+        elif 'Marca:' in fields:
+            brand = data_vehicle['Marca:']
         else:
-            marca = "unknown"
+            brand = "unknown"
 
-        path = './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/'
+        path = './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(ID) + '/'
 
         if not os.path.exists(path):
             os.makedirs(path)
 
         # creo el archivo .json con las características del vehiculo
 
-        with open('./download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/meta.json', 'w') as fp:
-            json.dump(datos_vehiculo, fp)
+        with open(path + 'meta.json', 'w') as fp:
+            json.dump(data_vehicle, fp)
 
-        print("Creado meta.json")
+        print("Created meta.json")
 
         # obtengo los links de las imagenes de la publicacion en la que me encuentro
 
@@ -138,8 +138,8 @@ for j in range(0, len(links_paginas)):
         y = 0
 
         while y < q:
-            urllib.request.urlretrieve(images[y], './download/olx/' + str(marca).lower().replace(' ', '-') + '/' + str(ID) + '/' + str(marca).lower() + '_' + str(ID) + '_' + str(y + 1) + '.jpg')
-            print("Descargada la imagen", y + 1, "de la publicacion", u + 1, "de la pagina", j + 1)
+            urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(ID) + '/' + str(brand).lower() + '_' + str(ID) + '_' + str(y + 1) + '.jpg')
+            print("Downloaded image", y + 1, "of publication", u + 1, "on page", j + 1)
             y = y + 1
 
 print("End")
