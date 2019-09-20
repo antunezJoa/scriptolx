@@ -56,6 +56,8 @@ for j in range(0, len(links_pages)):
             href2 = 'https:' + href
             links_public += [href2]
 
+    # elimino duplicados
+
     links_per_page = []
 
     for i in links_public:
@@ -79,7 +81,7 @@ for j in range(0, len(links_pages)):
         ides = list(map(int, ides))
         ID = max(ides)
 
-        # obtengo los datos del vehiculo, obtengo la marca y luego creo el json
+        # obtengo los datos del vehiculo
 
         data_vehicle = {}
         fields = []
@@ -91,10 +93,14 @@ for j in range(0, len(links_pages)):
                 fields += [field]
                 data_vehicle[field] = value
 
+        # obtengo la marca / modelo
+
         if 'Marca / Modelo:' in fields:
             brand = data_vehicle['Marca / Modelo:'].split(' ', 1)[0]
+
         elif 'Marca:' in fields:
             brand = data_vehicle['Marca:']
+
         else:
             brand = "unknown"
 
@@ -103,7 +109,7 @@ for j in range(0, len(links_pages)):
         if not os.path.exists(path):
             os.makedirs(path)
 
-        # creo el archivo .json con las características del vehiculo
+        # creo el archivo meta.json con las características del vehiculo
 
         with open(path + 'meta.json', 'w') as fp:
             json.dump(data_vehicle, fp)
@@ -131,11 +137,15 @@ for j in range(0, len(links_pages)):
                     q = 1
                     images2 += [source]
 
+        # elimino duplicados
+
         for i in images2:
             if i not in images:
                 images.append(i)
 
         y = 0
+
+        # descargo las imagenes
 
         while y < q:
             urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(ID) + '/' + str(brand).lower() + '_' + str(ID) + '_' + str(y + 1) + '.jpg')

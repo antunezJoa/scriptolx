@@ -64,11 +64,15 @@ def savelinks():
                 href2 = 'https:' + href
                 links_public += [href2]
 
+        # elimino duplicados
+
         links_per_page = []
 
         for i in links_public:
             if i not in links_per_page:
                 links_per_page.append(i)
+
+        # ahora creo el archivo item_links.json y voy guardando los links de las publicaciones
 
         for i in range(0, len(links_per_page)):
             links['url' + str(c)] = links_per_page[i]
@@ -80,6 +84,8 @@ def savelinks():
 
 
 def downloaddata():
+    # comienzo abriendo el archivo item_links.json para leerlo e ir obteniendo los links de las publicaciones
+
     with open('./download/olx/item_links.json', 'r') as f:
         domains = f.read()
 
@@ -103,7 +109,7 @@ def downloaddata():
         ides = list(map(int, ides))
         id_p = max(ides)
 
-        # obtengo los datos del vehiculo, obtengo la marca y luego creo el json
+        # obtengo los datos del vehiculo
 
         data_vehicle = {}
         fields = []
@@ -115,11 +121,14 @@ def downloaddata():
                 fields += [field]
                 data_vehicle[field] = value
 
+        # obtengo la marca / modelo
+
         if 'Marca / Modelo:' in fields:
             brand = data_vehicle['Marca / Modelo:'].split(' ', 1)[0]
 
         elif 'Marca:' in fields:
             brand = data_vehicle['Marca:']
+
         else:
             brand = "unknown"
 
@@ -128,7 +137,7 @@ def downloaddata():
         if not os.path.exists(path):
             os.makedirs(path)
 
-        # creo el archivo .json con las características del vehiculo
+        # creo el archivo meta.json con las características del vehiculo
 
         with open(path + 'meta.json', 'w') as fp:
             json.dump(data_vehicle, fp)
@@ -156,11 +165,15 @@ def downloaddata():
                     q = 1
                     images2 += [source]
 
+        # elimino duplicados
+
         for i in images2:
             if i not in images:
                 images.append(i)
 
         y = 0
+
+        # descargo las imagenes
 
         while y < q:
             urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/' + str(brand).lower() + '_' + str(id_p) + '_' + str(y + 1) + '.jpg')
