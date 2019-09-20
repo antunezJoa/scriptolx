@@ -101,7 +101,7 @@ def downloaddata():
         url_public_str = str(url_public)
         ides = re.findall('\d+', url_public_str)
         ides = list(map(int, ides))
-        ID = max(ides)
+        id_p = max(ides)
 
         # obtengo los datos del vehiculo, obtengo la marca y luego creo el json
 
@@ -123,7 +123,7 @@ def downloaddata():
         else:
             brand = "unknown"
 
-        path = './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(ID) + '/'
+        path = './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/'
 
         if not os.path.exists(path):
             os.makedirs(path)
@@ -163,8 +163,7 @@ def downloaddata():
         y = 0
 
         while y < q:
-            urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(
-                ID) + '/' + str(brand).lower() + '_' + str(ID) + '_' + str(y + 1) + '.jpg')
+            urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/' + str(brand).lower() + '_' + str(id_p) + '_' + str(y + 1) + '.jpg')
             print("Downloaded image", y + 1, "/", brand)
             y = y + 1
 
