@@ -80,7 +80,7 @@ def savelinks():
                 json.dump(links, file)
             print("Saved", links['url' + str(c)], "number of links saved:", c)
             c += 1
-    print("Link saved")
+    print("Links saved")
 
 
 def downloaddata():
@@ -91,11 +91,11 @@ def downloaddata():
 
     doms = json.loads(domains)
 
-    count = 0  # count es el contador que indica en cual link arranca la descarga de imagenes
+    count = 34140  # count es el contador que indica en cual link arranca la descarga de imagenes
 
-    links_number = 10  # aca va el numero de links guardados en el json
+    links_number = 40288  # aca va el numero de links guardados en el json
 
-    while count <= links_number:
+    for count in range(count, links_number):
         url_public = doms['url' + str(count)]
         print(url_public, count)
 
@@ -179,8 +179,6 @@ def downloaddata():
             urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/' + str(brand).lower() + '_' + str(id_p) + '_' + str(y + 1) + '.jpg')
             print("Downloaded image", y + 1, "/", brand)
             y = y + 1
-
-        count = count + 1
 
     print("Images downloaded")
 
