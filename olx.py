@@ -5,10 +5,14 @@ import os.path
 import re
 import json
 
+#  https://olx.com.ar
+
 domain = 'https://www.olx.com.ar/autos-cat-378'
 headers = {'User-Agent':
                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) '
                'Chrome/50.0.2661.102 Safari/537.36'}
+
+# funcion para guardar los links dentro de un .json
 
 
 def savelinks():
@@ -84,6 +88,8 @@ def savelinks():
 
 
 def downloaddata():
+    downs = {}
+
     # comienzo abriendo el archivo item_links.json para leerlo e ir obteniendo los links de las publicaciones
 
     with open('./download/olx/item_links.json', 'r') as f:
@@ -91,7 +97,7 @@ def downloaddata():
 
     doms = json.loads(domains)
 
-    count = 34140  # count es el contador que indica en cual link arranca la descarga de imagenes
+    count = 0  # count es el contador que indica en cual link arranca la descarga de imagenes
 
     links_number = 40288  # aca va el numero de links guardados en el json
 
@@ -101,6 +107,13 @@ def downloaddata():
 
         response = requests.get(url_public, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
+
+        #  en caso de no poder ver el error http del server en pantalla creo un archivo que va guardando el ultimo estado de count
+
+        count_copy = count
+        downs['downloads'] = count_copy
+        with open('./download/olx/downloads.json', "w") as file:
+            json.dump(downs, file)
 
         # obtengo el ID de la publicacion en la que me encuentro
 
@@ -136,6 +149,8 @@ def downloaddata():
 
         if not os.path.exists(path):
             os.makedirs(path)
+
+        print(brand)
 
         # creo el archivo meta.json con las características del vehiculo
 
@@ -177,9 +192,8 @@ def downloaddata():
 
         while y < q:
             urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/' + str(brand).lower() + '_' + str(id_p) + '_' + str(y + 1) + '.jpg')
-            print("Downloaded image", y + 1, "/", brand)
+            print("Downloaded image", y + 1)
             y = y + 1
-
     print("Images downloaded")
 
 
