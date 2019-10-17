@@ -102,18 +102,18 @@ def downloaddata():
     links_number = 40288  # aca va el numero de links guardados en el json
 
     for count in range(count, links_number):
-        url_public = doms['url' + str(count)]
-        print(url_public, count)
-
-        response = requests.get(url_public, headers=headers)
-        soup = BeautifulSoup(response.text, "html.parser")
-
         #  en caso de no poder ver el error http del server en pantalla creo un archivo que va guardando el ultimo estado de count
 
         count_copy = count
         downs['downloads'] = count_copy
         with open('./download/olx/downloads.json', "w") as file:
             json.dump(downs, file)
+
+        url_public = doms['url' + str(count)]
+        print(url_public, count)
+
+        response = requests.get(url_public, headers=headers)
+        soup = BeautifulSoup(response.text, "html.parser")
 
         # obtengo el ID de la publicacion en la que me encuentro
 
