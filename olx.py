@@ -12,6 +12,7 @@ headers = {'User-Agent':
                'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_5) AppleWebKit/537.36 (KHTML, like Gecko) '
                'Chrome/50.0.2661.102 Safari/537.36'}
 
+
 # funcion para guardar los links dentro de un .json
 
 
@@ -84,6 +85,13 @@ def savelinks():
                 json.dump(links, file)
             print("Saved", links['url' + str(c)], "number of links saved:", c)
             c += 1
+
+    #  guardo en info.json la cantidad total de links para mayor comodidad
+
+    links['links_number'] = c
+    with open('./download/olx/info.json', "w") as file:
+        json.dump(links, file)
+
     print("Links saved")
 
 
@@ -97,20 +105,20 @@ def downloaddata():
 
     doms = json.loads(domains)
 
-    count = 0  # count es el contador que indica en cual link arranca la descarga de imagenes
+    downloads = 0  # downloads es el contador que indica en cual link arranca la descarga de imagenes
 
-    links_number = 40288  # aca va el numero de links guardados en el json
+    links_number = 40288  # aca va el numero de links guardados en el .json
 
-    for count in range(count, links_number):
-        #  en caso de no poder ver el error http del server en pantalla creo un archivo que va guardando el ultimo estado de count
+    for downloads in range(downloads, links_number):
+        #  en caso de no poder ver el error http del server en pantalla
+        #  creo un archivo que va guardando el ultimo estado de downloads
 
-        count_copy = count
-        downs['downloads'] = count_copy
-        with open('./download/olx/downloads.json', "w") as file:
+        downs['downloads'] = downloads
+        with open('./download/olx/info.json', "w") as file:
             json.dump(downs, file)
 
-        url_public = doms['url' + str(count)]
-        print(url_public, count)
+        url_public = doms['url' + str(downloads)]
+        print(url_public, downloads)
 
         response = requests.get(url_public, headers=headers)
         soup = BeautifulSoup(response.text, "html.parser")
@@ -143,7 +151,8 @@ def downloaddata():
             brand = data_vehicle['Marca:']
 
         else:
-            brand = "unknown"
+            brand = "unknown"  # si se elimina una publicación, se dirige a la carpeta "unknown" junto con las
+            # publicaciones en las que NO se indico la marca del vehiculo en cuestion
 
         path = './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/'
 
@@ -191,7 +200,8 @@ def downloaddata():
         # descargo las imagenes
 
         while y < q:
-            urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(id_p) + '/' + str(brand).lower() + '_' + str(id_p) + '_' + str(y + 1) + '.jpg')
+            urllib.request.urlretrieve(images[y], './download/olx/' + str(brand).lower().replace(' ', '-') + '/' + str(
+                id_p) + '/' + str(brand).lower() + '_' + str(id_p) + '_' + str(y + 1) + '.jpg')
             print("Downloaded image", y + 1)
             y = y + 1
     print("Images downloaded")
