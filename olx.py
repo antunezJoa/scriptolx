@@ -207,9 +207,9 @@ def downloaddata():
     print("Images downloaded")
 
 
-path = './download/olx/item_links.json'
+item_links = './download/olx/item_links.json'
 
-if not os.path.exists(path):
+if not os.path.exists(item_links):
     savelinks()
 else:
     downloaddata()
